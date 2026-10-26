@@ -32,3 +32,10 @@ App web com login para o fechamento dos fretes de agregados e para os indicadore
 - `dash-shim.js`: liga o painel aos dados carregados pelo app.
 - `firestore.rules`: quem pode ler e escrever.
 - `correcoes-iniciais.json`: correções já combinadas, carregadas uma vez pelo botão em Correções.
+
+## Justificativa de custos
+
+A aba "Justificativa de custos" monta a prestação de contas do mês (orçado x realizado, volume x reajuste,
+indicadores da operação, evolução mensal, transportadores, justificativa e ações). Os números do orçamento
+ficam em `justificativas/{AAAA-MM}` no Firestore (só administradores gravam; atualize as regras com `firestore.rules`).
+"Apresentar" abre os slides em tela cheia; "Baixar PowerPoint" gera o .pptx no navegador (PptxGenJS 3.12.0 em `vendor/`, licença MIT).

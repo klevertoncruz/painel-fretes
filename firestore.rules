@@ -28,5 +28,9 @@ service cloud.firestore {
       allow read: if logado();
       allow write: if admin();
     }
+    match /justificativas/{doc} {
+      allow read: if logado();
+      allow write: if admin();
+    }
   }
 }

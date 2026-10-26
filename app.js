@@ -7,6 +7,7 @@ import {
   getFirestore, doc, getDoc, getDocs, collection, writeBatch, addDoc, deleteDoc, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
+import { iniciarJustificativa } from './justificativa.js';
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -79,7 +80,25 @@ onAuthStateChanged(auth, async (user) => {
     avisoAdmin = 'Não consegui ler config/admins (' + mensagemErro(e) + '). Confira se as regras do Firestore foram publicadas.';
   }
   document.querySelectorAll('.so-admin').forEach((el) => { el.hidden = !ehAdmin; });
+  if (!justificativaIniciada) {
+    justificativaIniciada = true;
+    iniciarJustificativa({ db, admin: ehAdmin, email: user.email });
+  }
   await carregarBase();
+});
+
+// ---------- abas ----------
+let justificativaIniciada = false;
+document.querySelectorAll('.abas [role="tab"]').forEach((tab) => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.abas [role="tab"]').forEach((t) => {
+      const ativo = t === tab;
+      t.setAttribute('aria-selected', String(ativo));
+      $(t.getAttribute('aria-controls')).hidden = !ativo;
+    });
+    if (tab.id === 'tab-just') $('aba-just').dispatchEvent(new Event('jc-abrir'));
+    else window.dash._redraw();
+  });
 });
 
 // ---------- leitura da base ----------

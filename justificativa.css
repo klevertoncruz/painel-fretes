@@ -1,0 +1,72 @@
+/* Abas do app e aba "Justificativa de custos" (formulário do mês e slides 16:9 que escalam com a largura). */
+.abas { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid #232b42; }
+.abas button { font: inherit; font-weight: 700; cursor: pointer; background: none; border: 0; border-bottom: 3px solid transparent; color: #9aa3b8; padding: 10px 14px; }
+.abas button[aria-selected="true"] { color: #f1f4fb; border-bottom-color: #3b82f6; }
+.abas button:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+
+.jc .jc-botoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.jc .jc-form { gap: 14px; }
+.jc .jc-linha1 { display: flex; flex-wrap: wrap; align-items: end; gap: 14px; }
+.jc .jc-linha1 .fq-field { min-width: 12rem; }
+.jc .jc-salvo { flex: 1 1 14rem; margin: 0 0 8px; }
+.jc .jc-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: 12px; }
+.jc .jc-textos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 12px; }
+.jc .fq-field small { color: var(--nv-muted); font-size: .75rem; }
+.jc .fq-field textarea { font: inherit; width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--nv-line); background: var(--nv-bg); color: var(--nv-fg); resize: vertical; }
+.jc .fq-field :is(input, textarea)[readonly] { opacity: .8; }
+.jc .fq-field textarea:focus-visible { outline: 2px solid var(--nv-accent); outline-offset: 2px; }
+.jc .btn-link { font-size: .75rem; padding: 0 0 0 4px; }
+
+.jc-slides { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 34rem), 1fr)); }
+
+/* slide: as medidas usam cqw para o slide inteiro escalar junto, na lista e em tela cheia */
+.jc-slide { container-type: inline-size; }
+.jc-slide { aspect-ratio: 16 / 9; display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; border-radius: 12px; border: 1px solid #232b42; background: #121829; color: #f1f4fb; }
+/* cqw num elemento conta a partir do container acima dele, por isso o tamanho base fica nos filhos do slide */
+.jc-slide > * { font-size: 1.55cqw; min-width: 0; }
+.jc-slide > header { background: linear-gradient(115deg, #10132b 0%, #1b1a46 55%, #121a3a 100%); padding: 2.2cqw 3.2cqw 1.6cqw; border-bottom: .25cqw solid #3b82f6; }
+.jc-slide h2 { margin: 0; font-size: 2.9cqw; font-weight: 800; letter-spacing: -.01em; }
+.jc-slide header p { margin: .4cqw 0 0; color: #a5b4fc; font-size: 1.5cqw; }
+.jc-slide footer { display: flex; justify-content: space-between; gap: 2cqw; padding: .9cqw 3.2cqw; color: #7c86a0; font-size: 1.05cqw; border-top: 1px solid #232b42; }
+.jc-corpo { display: grid; gap: 1.6cqw; align-content: start; padding: 2cqw 3.2cqw; min-height: 0; overflow: hidden; }
+.jc-kpis { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 1.4cqw; }
+.jc-kpi { display: grid; gap: .4cqw; background: #182038; border: 1px solid #2a3352; border-radius: 1cqw; padding: 1.3cqw 1.6cqw; min-width: 0; }
+.jc-kpi b { font-size: 2.5cqw; font-weight: 800; line-height: 1.1; overflow-wrap: anywhere; }
+.jc-kpi span { font-size: 1.1cqw; color: #9aa3b8; text-transform: uppercase; letter-spacing: .03em; }
+.jc-kpis2 .jc-kpi b { font-size: 1.9cqw; }
+.jc-kpi.jc-ruim b, td.jc-ruim { color: #f87171; }
+.jc-kpi.jc-bom b, td.jc-bom { color: #34d399; }
+.jc-2col { display: grid; grid-template-columns: 1fr 1.15fr; gap: 2.4cqw; align-items: start; min-height: 0; }
+.jc-svg { width: 100%; height: auto; max-height: 21cqw; display: block; }
+.jc-svg .jc-eixo { stroke: #2a3352; }
+.jc-svg .jc-b0 { fill: #4b5577; }
+.jc-svg .jc-b1 { fill: #6b7aa6; }
+.jc-svg .jc-b2, .jc-svg .jc-b1.jc-dest { fill: #3b82f6; }
+.jc-svg .jc-up { fill: #f87171; }
+.jc-svg .jc-down { fill: #34d399; }
+.jc-svg .jc-vl { fill: #f1f4fb; font-size: 11px; font-weight: 700; text-anchor: middle; }
+.jc-svg .jc-rl { fill: #9aa3b8; font-size: 10px; text-anchor: middle; }
+.jc-svg .jc-nota { fill: #7c86a0; font-size: 9px; }
+.jc-tab { width: 100%; border-collapse: collapse; font-size: 1.25cqw; font-variant-numeric: tabular-nums; }
+.jc-tab th { background: #1e2a55; color: #c7d2fe; font-weight: 700; text-align: right; padding: .6cqw .9cqw; }
+.jc-tab td { text-align: right; padding: .55cqw .9cqw; border-bottom: 1px solid #232b42; }
+.jc-tab .jc-l { text-align: left; }
+.jc-tab tr:last-child td { border-bottom: 0; }
+.jc-txt { display: grid; gap: .8cqw; line-height: 1.45; }
+.jc-txt h4 { margin: .4cqw 0 0; font-size: 1.15cqw; color: #a5b4fc; letter-spacing: .05em; }
+.jc-txt p, .jc-txt ul { margin: 0; }
+.jc-txt ul { padding-left: 1.6cqw; display: grid; gap: .5cqw; }
+.jc-txt.jc-grande { font-size: 1.85cqw; }
+
+.jc-capa { background: radial-gradient(120% 120% at 0% 0%, #1b1a46 0%, #0b1020 60%); grid-template-rows: 1fr auto; }
+.jc-capa-in { display: grid; align-content: center; gap: 1cqw; padding: 0 6cqw; border-left: .6cqw solid #3b82f6; margin-left: 4cqw; }
+.jc-capa h2 { font-size: 5cqw; }
+.jc-capa p { margin: 0; color: #cbd5e1; font-size: 1.8cqw; }
+.jc-capa .jc-capa-mes { color: #8b93ff; font-weight: 800; font-size: 3cqw; }
+
+.jc-show { position: fixed; inset: 0; z-index: 50; background: #05070f; display: grid; place-items: center; padding: 2vh 2vw; outline: none; }
+.jc-show-slide { width: min(96vw, calc(88vh * 16 / 9)); }
+.jc-show-slide .jc-slide { border-radius: 0; }
+.jc-show-nav { position: fixed; right: 16px; bottom: 12px; display: flex; gap: 8px; opacity: .55; }
+.jc-show-nav:hover, .jc-show-nav:focus-within { opacity: 1; }
+.jc-show-nav button { min-width: 2.6rem; }
