@@ -31,7 +31,7 @@
       <span id="status-base" class="status-base">Carregando dados…</span>
       <div class="barra-acoes">
         <label class="btn-primario so-admin" hidden>Importar planilha<input id="arquivo" type="file" accept=".xlsx,.xls,.csv" hidden></label>
-        <button id="btn-correcoes" class="btn-sec so-admin" type="button" hidden>Correções (<span id="qtd-correcoes">0</span>)</button>
+        <button id="btn-correcoes" class="btn-sec so-admin" type="button" hidden>Correções (<span id="qtd-correcoes">0</span>)<span id="aviso-susp" class="badge-susp" hidden></span></button>
         <span id="usuario" class="usuario"></span>
         <button id="btn-sair" class="btn-sec" type="button">Sair</button>
       </div>
@@ -39,6 +39,16 @@
     <p id="status-import" class="status-import so-admin" hidden></p>
 
     <section id="painel-correcoes" class="fq correcoes" hidden>
+      <h2>Valores suspeitos <span id="qtd-susp" class="badge-susp">0</span></h2>
+      <p>Valores da planilha que fogem muito do normal e podem ser erro de digitação no sistema. Use <b>Corrigir</b> para informar o valor certo ou <b>Está certo</b> para tirar da lista.</p>
+      <div class="fq-scroll susp-scroll">
+        <table class="fq-table">
+          <thead><tr><th class="fq-l">Data</th><th class="fq-l">Carregamento</th><th class="fq-l">Frota</th><th class="fq-l">Rota</th><th class="fq-l">Campo</th><th>Valor na planilha</th><th class="fq-l">Por que chamou atenção</th><th></th></tr></thead>
+          <tbody id="lista-suspeitos"></tbody>
+        </table>
+      </div>
+      <p id="susp-vazio" class="status-ok" hidden>Nenhum valor suspeito na base atual.</p>
+
       <h2>Correções da base</h2>
       <p>Valores que estão errados no sistema e são trocados no painel. Elas continuam valendo quando você importa uma planilha nova.</p>
       <form id="form-correcao" class="form-correcao" novalidate>

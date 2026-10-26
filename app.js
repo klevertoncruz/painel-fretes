@@ -119,10 +119,114 @@ function aplicarEDesenhar() {
   const linhas = linhasBase.map((r) => ({ ...r }));
   for (const c of correcoes) {
     for (const r of linhas) {
-      if (String(r.carregamento).trim() === String(c.carregamento).trim()) r[c.campo] = c.valor;
+      if (!c.conferido && String(r.carregamento).trim() === String(c.carregamento).trim()) r[c.campo] = c.valor;
     }
   }
   window.dash._set('fretes', { status: linhas.length ? 'ok' : 'loading', data: linhas });
+  desenharSuspeitos(linhas);
+}
+
+// ---------- valores suspeitos ----------
+// Mesmos critérios usados na conferência feita no chat: entregas muito acima do normal da rota,
+// número que parece ter vindo de outro campo, valor por kg fora da curva e km muito acima do previsto.
+const mediana = (xs) => {
+  const v = xs.filter((x) => x != null && Number.isFinite(x)).sort((p, q) => p - q);
+  if (!v.length) return null;
+  const m = Math.floor(v.length / 2);
+  return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
+};
+
+function acharSuspeitos(linhas) {
+  const agreg = linhas.filter((r) => !r.frota_propria);
+  const porRota = new Map();
+  for (const r of agreg) {
+    if (!porRota.has(r.rota)) porRota.set(r.rota, []);
+    porRota.get(r.rota).push(r);
+  }
+  const medEntRota = new Map([...porRota].map(([k, vs]) => [k, mediana(vs.map((r) => r.entregas))]));
+  const medEntGeral = mediana(agreg.map((r) => r.entregas));
+  const medPorKg = mediana(agreg.filter((r) => r.valor_carga && r.peso_kg).map((r) => r.valor_carga / r.peso_kg));
+  const medPeso = mediana(agreg.map((r) => r.peso_kg));
+  const fmt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
+  const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  const limiteSemFrete = new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10);
+  const lista = [];
+  const add = (r, campo, motivo) => lista.push({ r, campo, motivo });
+
+  for (const r of agreg) {
+    const medE = (r.rota ? medEntRota.get(r.rota) : medEntGeral) || 0;
+    if (r.entregas != null && r.valor_carga && Math.abs(r.entregas - r.valor_carga) < 1) {
+      add(r, 'entregas', 'O número de entregas é igual ao valor da carga (' + brl.format(r.valor_carga) + '). Parece digitado no campo errado.');
+    } else if (r.entregas != null && r.entregas >= Math.max(40, 3 * medE)) {
+      add(r, 'entregas', fmt.format(r.entregas) + ' entregas. O normal nesta rota é ' + fmt.format(medE) + '.');
+    }
+    if (r.peso_kg && r.valor_carga && Math.abs(r.peso_kg - r.valor_carga) < 0.01) {
+      add(r, 'peso_kg', 'O peso é igual ao valor da carga. Parece que o valor foi copiado para o peso.');
+    } else if (r.peso_kg && medPeso && r.peso_kg > Math.max(20000, 4 * medPeso)) {
+      add(r, 'peso_kg', fmt.format(r.peso_kg) + ' kg. O normal é ' + fmt.format(medPeso) + ' kg por carga.');
+    }
+    if (r.valor_carga && r.peso_kg && medPorKg && r.valor_carga / r.peso_kg > 8 * medPorKg) {
+      add(r, 'valor_carga', brl.format(r.valor_carga / r.peso_kg) + ' por kg. O normal é ' + brl.format(medPorKg) + ' por kg. Pode faltar a vírgula ou ter um dígito a mais.');
+    }
+    if (r.km_realizado != null && r.km_realizado < 0) {
+      add(r, 'km_realizado', 'Km rodado negativo.');
+    } else if (r.km_realizado != null && r.km_previsto && r.km_realizado > 3 * r.km_previsto && r.km_realizado - r.km_previsto > 150) {
+      add(r, 'km_realizado', fmt.format(r.km_realizado) + ' km rodados para ' + fmt.format(r.km_previsto) + ' km previstos.');
+    }
+    if (r.frete_total == null && r.data && r.data < limiteSemFrete) {
+      add(r, 'frete_total', 'Viagem sem valor de frete há mais de 3 dias. Ela fica fora do fechamento.');
+    }
+  }
+  // tira o que já tem correção ou foi marcado como certo para o mesmo carregamento e campo
+  const tratados = new Set(correcoes.map((c) => String(c.carregamento).trim() + '|' + c.campo));
+  return lista.filter((s) => !tratados.has(String(s.r.carregamento).trim() + '|' + s.campo))
+    .sort((p, q) => (q.r.data || '').localeCompare(p.r.data || ''));
+}
+
+function desenharSuspeitos(linhas) {
+  const lista = ehAdmin ? acharSuspeitos(linhas) : [];
+  const fmt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
+  $('qtd-susp').textContent = String(lista.length);
+  $('aviso-susp').hidden = !lista.length;
+  $('aviso-susp').textContent = String(lista.length);
+  $('aviso-susp').title = lista.length + ' valores suspeitos';
+  $('susp-vazio').hidden = lista.length > 0;
+  $('lista-suspeitos').replaceChildren(...lista.map((s) => {
+    const r = s.r;
+    const tr = document.createElement('tr');
+    const cel = (t, cls) => { const td = document.createElement('td'); td.textContent = t; if (cls) td.className = cls; return td; };
+    tr.append(cel(br(r.data), 'fq-l'), cel(r.carregamento, 'fq-l'), cel(r.frota, 'fq-l'), cel(r.rota || '—', 'fq-l'),
+      cel(CAMPOS[s.campo] || s.campo, 'fq-l'), cel(r[s.campo] == null ? '—' : fmt.format(r[s.campo]), 'fq-warn'), cel(s.motivo, 'fq-wrap'));
+    const acoes = document.createElement('td');
+    const box = document.createElement('div'); box.className = 'acoes-susp';
+    const corrigir = document.createElement('button');
+    corrigir.type = 'button'; corrigir.className = 'btn-primario'; corrigir.textContent = 'Corrigir';
+    corrigir.addEventListener('click', () => {
+      $('corr-carga').value = r.carregamento;
+      $('corr-campo').value = s.campo;
+      $('corr-valor').value = '';
+      $('corr-motivo').value = s.motivo;
+      $('form-correcao').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $('corr-valor').focus();
+      $('corr-msg').textContent = 'Digite o valor certo de ' + (CAMPOS[s.campo] || s.campo) + ' do carregamento ' + r.carregamento + ' e clique em Salvar correção.';
+    });
+    const certo = document.createElement('button');
+    certo.type = 'button'; certo.className = 'btn-sec'; certo.textContent = 'Está certo';
+    certo.addEventListener('click', async () => {
+      certo.disabled = true;
+      try {
+        await addDoc(collection(db, 'correcoes'), {
+          carregamento: String(r.carregamento).trim(), campo: s.campo, valor: r[s.campo] ?? null, antes: r[s.campo] ?? null,
+          motivo: 'Conferido: o valor está certo.', conferido: true, criado_por: auth.currentUser.email, criado_em: serverTimestamp(),
+        });
+        await carregarCorrecoes();
+      } catch (e) { certo.disabled = false; $('corr-msg').textContent = mensagemErro(e); }
+    });
+    box.append(corrigir, certo);
+    acoes.append(box);
+    tr.append(acoes);
+    return tr;
+  }));
 }
 
 // ---------- importação da planilha ----------
@@ -202,6 +306,8 @@ $('arquivo').addEventListener('change', async (ev) => {
     const datas = linhas.map((r) => r.data).sort();
     aviso.textContent = 'Importado: ' + linhas.length + ' linhas, saídas de ' + br(datas[0]) + ' a ' + br(datas[datas.length - 1]) + '.';
     await carregarBase();
+    const n = Number($('qtd-susp').textContent) || 0;
+    if (n) aviso.textContent += ' ' + n + ' valores suspeitos para conferir em Correções.';
   } catch (e) {
     aviso.textContent = 'Não foi possível importar: ' + (e.code ? mensagemErro(e) : e.message);
   }
@@ -257,7 +363,7 @@ function desenharCorrecoes() {
     const tr = document.createElement('tr');
     const cel = (t, cls) => { const td = document.createElement('td'); td.textContent = t; if (cls) td.className = cls; return td; };
     tr.append(cel(c.carregamento, 'fq-l'), cel(CAMPOS[c.campo] || c.campo, 'fq-l'), cel(c.antes == null ? '—' : fmt.format(c.antes)),
-      cel(fmt.format(c.valor)), cel(c.motivo || '', 'fq-wrap'));
+      cel(c.conferido ? 'conferido' : fmt.format(c.valor)), cel(c.motivo || '', 'fq-wrap'));
     const acao = document.createElement('td');
     if (ehAdmin) {
       const b = document.createElement('button');
