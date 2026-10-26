@@ -1,0 +1,66 @@
+/* Cores e letras da apresentação da Vieira Distribuidor: fundo branco, verde #225B18, verde-azulado #1F7E78,
+   laranja #F4842D, vermelho #C0392B, cinza #696969, caixas #F5F7F4 com borda verde, Arial.
+   Carregado por último: troca o tema escuro do painel sem mexer em painel.css (que é cópia do painel do Claude). */
+:root {
+  --vd-verde: #225B18; --vd-teal: #1F7E78; --vd-laranja: #F4842D; --vd-verm: #C0392B; --vd-cinza: #696969; --vd-txt: #232323;
+  --vd-claro: #F5F7F4; --vd-borda: #E3E9E8; --vd-barra: #C9D6C6;
+  --color-fg: #232323; --color-fg-muted: #696969; --color-bg: #ffffff; --color-panel: #ffffff; --color-border-line: #E3E9E8;
+  --cds-surface-popover: #ffffff; --cds-border: #E3E9E8; --cds-text-secondary: #696969; --cds-shadow-popover: 0 6px 18px rgba(0, 0, 0, .12);
+  color-scheme: light;
+}
+html, body { background: #EEF2EF; color: var(--vd-txt); font-family: Arial, Helvetica, sans-serif; }
+.fq {
+  --nv-bg: #ffffff; --nv-card: #ffffff; --nv-card-hi: #F5F7F4; --nv-border: #E3E9E8; --nv-fg: #232323; --nv-muted: #696969;
+  --nv-accent: #225B18; --nv-lilac: #1F7E78; --nv-accent-deep: #225B18; --nv-line: #CBD5CF; --nv-grid: #E3E9E8;
+  --nv-mutedbar: #C9D6C6; --nv-group: #E8F0E6; --nv-good: #225B18; --nv-warn: #F4842D; --nv-bad: #C0392B; --nv-light: #ffffff;
+  --nv-display: Arial, Helvetica, sans-serif;
+  color-scheme: light; font-family: Arial, Helvetica, sans-serif;
+}
+.fq.barra, .fq#aba-painel, .fq.jc, .fq.correcoes, .fq.login-card { background: #ffffff; border: 1px solid var(--vd-borda); }
+.fq .fq-banner, .fq.login-card { background: #ffffff; border: 1px solid var(--vd-borda); border-bottom: 3px solid var(--vd-laranja); }
+.fq .fq-head h1 { color: var(--vd-teal); font-weight: 700; }
+.fq .fq-head h1 em { color: var(--vd-verde); }
+.login-card h1 { color: var(--vd-teal); }
+.login-card h1 em { color: var(--vd-verde); }
+.fq .fq-logo { background: transparent; color: var(--vd-teal); width: auto; height: auto; border-radius: 0; }
+.fq .fq-logo img { display: block; height: 44px; width: auto; }
+.fq .fq-filtros { background: var(--vd-claro); border-color: var(--vd-borda); }
+.fq .fq-field input, .fq .fq-field select, .login-card input, .form-correcao input, .form-correcao select { background: #ffffff; color: var(--vd-txt); border-color: #CBD5CF; }
+
+/* indicadores como as caixas da apresentação: fundo claro, borda verde, número verde */
+.fq .fq-tile { background: var(--vd-claro); border: 1.5px solid var(--vd-verde); border-radius: 10px; }
+.fq .fq-tile > span { color: var(--vd-cinza); text-transform: uppercase; font-weight: 700; font-size: .72rem; letter-spacing: .02em; }
+.fq .fq-tile > b { color: var(--vd-verde); font-weight: 700; }
+.fq .fq-t1 { background: var(--vd-verde); }
+.fq .fq-t1 > span, .fq .fq-t1 > b, .fq .fq-t1 > small { color: #ffffff; }
+.fq .fq-t1 .fq-ico { background: rgba(255, 255, 255, .18); color: #ffffff; }
+.fq .fq-ico, .fq .fq-t2 .fq-ico, .fq .fq-t3 .fq-ico, .fq .fq-t8 .fq-ico, .fq .fq-t4 .fq-ico, .fq .fq-t5 .fq-ico, .fq .fq-t6 .fq-ico, .fq .fq-t7 .fq-ico { background: rgba(31, 126, 120, .12); color: var(--vd-teal); }
+.fq .fq-t4 .fq-ico, .fq .fq-t7 .fq-ico { background: rgba(244, 132, 45, .14); color: #d06a1a; }
+.fq .fq-t4 > b { color: var(--vd-verde); }
+
+.fq .fq-card { background: #ffffff; border: 1px solid var(--vd-borda); }
+.fq .fq-section > h2 { color: var(--vd-teal); font-weight: 700; border-bottom: 1.5px solid var(--vd-laranja); padding-bottom: 6px; }
+.fq .fq-card h3 { color: var(--vd-teal); font-weight: 700; }
+.fq .fq-table th { background: var(--vd-verde); color: #ffffff; border-bottom: 1px solid var(--vd-borda); }
+.fq .fq-table th button { color: #ffffff; }
+.fq .fq-table td { color: var(--vd-txt); border-bottom: 1px solid var(--vd-borda); }
+.fq .fq-table tbody tr:nth-child(even) td { background: var(--vd-claro); }
+.fq .fq-table tr.fq-grp td { background: #E8F0E6; color: var(--vd-verde); }
+.fq .fq-table tr.fq-sub td { background: #EEF2EF; border-bottom: 2px solid var(--vd-barra); }
+.fq .fq-table tr.fq-tot td { background: var(--vd-teal); color: #ffffff; }
+.fq .fq-table tbody tr:hover td { background: #E8F0E6; }
+.fq .fq-warn { color: #d06a1a; }
+
+.btn-primario { background: var(--vd-verde); border-color: var(--vd-verde); color: #ffffff; }
+.btn-sec { color: var(--vd-txt); border-color: #CBD5CF; background: #ffffff; }
+.btn-sec:hover { border-color: var(--vd-verde); }
+.btn-link { color: var(--vd-teal); }
+.fq .fq-acoes button:first-child { background: var(--vd-verde); border-color: var(--vd-verde); }
+.fq .fq-acoes button, .fq .fq-copy, .fq .fq-export { color: var(--vd-txt); border-color: #CBD5CF; background: #ffffff; }
+.fq .fq-acoes button:first-child { color: #ffffff; }
+.status-import { color: #b85d12; }
+.status-ok { color: var(--vd-verde); }
+.badge-susp { background: var(--vd-laranja); color: #ffffff; }
+.barra-logo { height: 30px; width: auto; display: block; }
+.fq.barra { border-bottom: 3px solid var(--vd-teal); }
+:is(.btn-primario, .btn-sec, .btn-link, input, select, textarea):focus-visible { outline-color: var(--vd-teal); }

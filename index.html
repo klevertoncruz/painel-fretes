@@ -10,11 +10,12 @@
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="painel.css">
   <link rel="stylesheet" href="justificativa.css">
+  <link rel="stylesheet" href="tema-vieira.css">
 </head>
 <body>
   <main id="login" class="login" hidden>
     <form id="form-login" class="fq login-card" novalidate>
-      <i class="fq-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></i>
+      <i class="fq-logo"><img src="img/logo-vieira.png" alt="Vieira Distribuidor"></i>
       <h1>Painel de fretes <em>agregados</em></h1>
       <p>Entre com o usuário e a senha que você recebeu.</p>
       <label for="email">E-mail</label>
@@ -29,6 +30,7 @@
 
   <div id="app" class="app" hidden>
     <nav class="fq barra">
+      <img class="barra-logo" src="img/logo-vieira.png" alt="Vieira Distribuidor">
       <span id="status-base" class="status-base">Carregando dados…</span>
       <div class="barra-acoes">
         <label class="btn-primario so-admin" hidden>Importar planilha<input id="arquivo" type="file" accept=".xlsx,.xls,.csv" hidden></label>
@@ -243,6 +245,7 @@
         <div class="fq-field"><label for="jc-justificativa">Justificativa do gestor</label><textarea id="jc-justificativa" rows="6"></textarea><small>Vazio = usa o texto sugerido (em cinza). <button id="jc-sugerir" class="btn-link so-admin-jc" type="button" hidden>Escrever o texto sugerido para editar</button></small></div>
         <div class="fq-field"><label for="jc-acoes">Ações e recomendações</label><textarea id="jc-acoes" rows="4" placeholder="Uma por linha"></textarea></div>
       </div>
+      <label class="jc-check"><input id="jc-extras" type="checkbox" checked> Incluir slides com dados da base do app (indicadores da operação, evolução mensal e transportadores)</label>
       <p id="jc-aviso" class="status-import" role="status"></p>
     </div>
 
