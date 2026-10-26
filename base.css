@@ -1,0 +1,49 @@
+/* Tokens que o painel usava do Claude, mais o layout do app (login, barra superior, correções). Tema único escuro. */
+:root {
+  --cds-font-size-caption: .8rem; --cds-font-size-body: .95rem; --cds-font-size-heading: 1.05rem; --cds-font-size-title: 1.9rem;
+  --cds-font-weight-medium: 600;
+  --cds-gap-xs: 4px; --cds-gap-sm: 8px; --cds-gap-md: 14px; --cds-gap-lg: 20px; --cds-gap-xl: 24px;
+  --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-md: 12px; --cds-pad-lg: 18px; --cds-pad-xl: 24px;
+  --cds-radius: 10px; --cds-dur-slow: .3s;
+  --cds-surface-popover: #182038; --cds-border: #2a3352; --cds-shadow-popover: 0 8px 24px rgba(0, 0, 0, .45); --cds-text-secondary: #9aa3b8;
+  --color-fg: #f1f4fb; --color-fg-muted: #9aa3b8; --color-bg: #0b1020; --color-panel: #121829; --color-border-line: #232b42;
+  --color-warn: #fbbf24; --color-bad: #f87171;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #070b17; color: #f1f4fb; font-family: "Nunito Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif; font-size: 15px; }
+[hidden] { display: none !important; }
+
+.app { max-width: 1440px; margin: 0 auto; padding-block: 16px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
+
+.login { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+.fq.login-card { width: min(100%, 400px); gap: 10px; border: 1px solid var(--nv-border); background: linear-gradient(160deg, #121633, #121829 60%); }
+.login-card h1 { margin: 6px 0 0; font-weight: 800; font-size: 1.5rem; }
+.login-card h1 em { font-style: normal; color: var(--nv-lilac); }
+.login-card p { margin: 0 0 6px; color: var(--nv-muted); }
+.login-card label { font-size: .8rem; font-weight: 600; margin-top: 4px; }
+.login-card input, .form-correcao input, .form-correcao select {
+  font: inherit; width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--nv-line); background: var(--nv-bg); color: var(--nv-fg);
+}
+.login-erro { min-height: 1.2em; color: var(--nv-warn) !important; }
+
+.btn-primario, .btn-sec, .btn-link { font: inherit; font-weight: 700; cursor: pointer; border-radius: 10px; padding: 9px 14px; display: inline-flex; align-items: center; justify-content: center; }
+.btn-primario { background: var(--nv-accent, #3b82f6); color: #fff; border: 1px solid var(--nv-accent, #3b82f6); }
+.btn-primario:disabled { opacity: .6; cursor: wait; }
+.btn-sec { background: transparent; color: var(--nv-fg, #f1f4fb); border: 1px solid var(--nv-line, #2a3352); }
+.btn-sec:hover { border-color: var(--nv-accent, #3b82f6); }
+.btn-link { background: none; border: 0; color: var(--nv-lilac); font-weight: 600; padding: 4px; }
+:is(.btn-primario, .btn-sec, .btn-link, input, select):focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+
+.fq.barra { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 16px; border: 1px solid var(--nv-border); }
+.barra-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.status-base { color: var(--nv-muted); font-size: .85rem; }
+.usuario { color: var(--nv-muted); font-size: .85rem; overflow-wrap: anywhere; }
+.status-import { margin: 0; color: #fbbf24; font-size: .9rem; }
+
+.fq.correcoes { border: 1px solid var(--nv-border); }
+.correcoes h2 { margin: 0; font-size: 1.15rem; font-weight: 800; }
+.correcoes > p { margin: 0; color: var(--nv-muted); }
+.form-correcao { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: 12px; align-items: end; }
+.form-correcao .fq-field-largo { grid-column: span 2; }
+@media (max-width: 520px) { .form-correcao .fq-field-largo { grid-column: auto; } }

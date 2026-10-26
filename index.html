@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel de Fretes Agregados</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="painel.css">
+</head>
+<body>
+  <main id="login" class="login" hidden>
+    <form id="form-login" class="fq login-card" novalidate>
+      <i class="fq-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></i>
+      <h1>Painel de fretes <em>agregados</em></h1>
+      <p>Entre com o usuário e a senha que você recebeu.</p>
+      <label for="email">E-mail</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" autocomplete="current-password" required>
+      <button id="btn-entrar" class="btn-primario" type="submit">Entrar</button>
+      <button id="btn-esqueci" class="btn-link" type="button">Esqueci a senha</button>
+      <p id="login-erro" class="login-erro" role="alert"></p>
+    </form>
+  </main>
+
+  <div id="app" class="app" hidden>
+    <nav class="fq barra">
+      <span id="status-base" class="status-base">Carregando dados…</span>
+      <div class="barra-acoes">
+        <label class="btn-primario so-admin" hidden>Importar planilha<input id="arquivo" type="file" accept=".xlsx,.xls,.csv" hidden></label>
+        <button id="btn-correcoes" class="btn-sec so-admin" type="button" hidden>Correções (<span id="qtd-correcoes">0</span>)</button>
+        <span id="usuario" class="usuario"></span>
+        <button id="btn-sair" class="btn-sec" type="button">Sair</button>
+      </div>
+    </nav>
+    <p id="status-import" class="status-import so-admin" hidden></p>
+
+    <section id="painel-correcoes" class="fq correcoes" hidden>
+      <h2>Correções da base</h2>
+      <p>Valores que estão errados no sistema e são trocados no painel. Elas continuam valendo quando você importa uma planilha nova.</p>
+      <form id="form-correcao" class="form-correcao" novalidate>
+        <div class="fq-field"><label for="corr-carga">Nº carregamento</label><input id="corr-carga" inputmode="numeric"></div>
+        <div class="fq-field"><label for="corr-campo">Campo</label><select id="corr-campo"></select></div>
+        <div class="fq-field"><label for="corr-valor">Valor certo</label><input id="corr-valor" inputmode="decimal" placeholder="ex.: 87.117,52"></div>
+        <div class="fq-field fq-field-largo"><label for="corr-motivo">Motivo</label><input id="corr-motivo"></div>
+        <button class="btn-primario" type="submit">Salvar correção</button>
+        <button id="btn-iniciais" class="btn-sec" type="button" hidden>Carregar as correções já combinadas</button>
+      </form>
+      <p id="corr-msg" class="status-import" role="status"></p>
+      <div class="fq-scroll">
+        <table class="fq-table">
+          <thead><tr><th class="fq-l">Carregamento</th><th class="fq-l">Campo</th><th>Antes</th><th>Agora</th><th class="fq-l">Motivo</th><th></th></tr></thead>
+          <tbody id="lista-correcoes"></tbody>
+        </table>
+      </div>
+    </section>
+
+<div class="fq">
+  <header class="fq-head fq-banner" id="resumo">
+    <div class="fq-top">
+      <div class="fq-titulo">
+        <i class="fq-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></i>
+        <div>
+          <h1>Painel de fretes <em>agregados</em></h1>
+          <p class="fq-sub">Frota agregada · <span id="fq-reg">—</span> viagens no filtro</p>
+        </div>
+      </div>
+      <button class="fq-export" id="fq-export" type="button"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>Copiar para Excel</button>
+    </div>
+    <p class="fq-take dash-skeleton" id="fq-take" data-source="fretes">—</p>
+    <p class="fq-period">A exportação tem saídas de <span data-source="periodo" data-field="inicio" id="fq-ini">—</span> a <span data-source="periodo" data-field="fim" id="fq-fim">—</span>. Escolha as datas do fechamento abaixo.</p>
+  </header>
+
+  <div class="fq-filtros" id="filtros">
+    <div class="fq-field"><label for="fq-de">Data saída de</label><input id="fq-de" type="date" min="2000-01-01" max="2099-12-31"></div>
+    <div class="fq-field"><label for="fq-ate">Data saída até</label><input id="fq-ate" type="date" min="2000-01-01" max="2099-12-31"></div>
+    <div class="fq-field"><label for="fq-frota">Frota</label><select id="fq-frota"></select></div>
+    <div class="fq-field"><label for="fq-ag">Transportador</label><select id="fq-ag"></select></div>
+    <div class="fq-acoes"><button id="fq-tudo" type="button">Período todo</button><button id="fq-limpa" type="button">Limpar filtros</button></div>
+  </div>
+
+  <div class="fq-tiles" id="indicadores" data-source="fretes">
+    <div class="fq-tile fq-t1"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></i><span>Total a pagar</span><b class="dash-skeleton" data-k="frete_total">—</b><small>Soma do valor total do frete</small></div>
+    <div class="fq-tile fq-t2"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></i><span>Viagens de agregados</span><b class="dash-skeleton" data-k="viagens">—</b><small>Carregamentos com frete</small></div>
+    <div class="fq-tile fq-t3"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 5 21"/><path d="m16 3 3 18"/><path d="M12 5v3"/><path d="M12 11v3"/><path d="M12 17v3"/></svg></i><span>Km rodados</span><b class="dash-skeleton" data-k="km">—</b><small id="fq-km-ff">Km realizado dos agregados</small></div>
+    <div class="fq-tile fq-t8"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><path d="m9 10 2 2 4-4"/></svg></i><span>Entregas realizadas</span><b class="dash-skeleton" data-k="entregas">—</b><small>Soma das entregas das viagens</small></div>
+    <div class="fq-tile fq-t4"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg></i><span>Frete sobre a carga</span><b class="dash-skeleton" data-k="pct_frete_carga">—</b><small>Frete ÷ valor da carga</small></div>
+    <div class="fq-tile fq-t5"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3.5 3.5 0 0 0 0-7h-4a3.5 3.5 0 0 1 0-7h6"/></svg></i><span>Custo por km</span><b class="dash-skeleton" data-k="r_km">—</b><small>Frete ÷ km realizado</small></div>
+    <div class="fq-tile fq-t6"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></svg></i><span>Custo por entrega</span><b class="dash-skeleton" data-k="r_entrega">—</b><small>Frete ÷ entregas</small></div>
+    <div class="fq-tile fq-t7"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20h12l-2-11H8z"/><circle cx="12" cy="6" r="2.5"/></svg></i><span>Custo por tonelada</span><b class="dash-skeleton" data-k="r_ton">—</b><small>Frete ÷ peso transportado</small></div>
+  </div>
+
+  <section class="fq-section" id="fechamento">
+    <h2>Fechamento por agregado</h2>
+    <div class="fq-card" data-source="fretes">
+      <div class="fq-cardhead">
+        <h3>Viagens a pagar por agregado</h3>
+        <div>
+          <button class="fq-copy" id="fq-copiar" type="button">Copiar tabela</button>
+        </div>
+      </div>
+      <p>Cada viagem de agregado nas datas escolhidas, com subtotal por transportador. Viagens da frota própria (placas FF) ficam fora: <span id="fq-ff">—</span> viagens nessas datas. "Copiar tabela" copia o que está na tela para colar no Excel.</p>
+      <div class="fq-scroll">
+        <table class="fq-table" id="fq-fech">
+          <thead><tr>
+            <th class="fq-l">Data saída</th>
+            <th class="fq-l">Nº carga</th>
+            <th class="fq-l">Frota</th>
+            <th class="fq-l">Rota</th>
+            <th>Km previsto</th>
+            <th>Km rodado</th>
+            <th>Dispersão</th>
+            <th>Peso (kg)</th>
+            <th>Valor carga</th>
+            <th>Entregas</th>
+            <th>Frete s/ diesel</th>
+            <th>Frete manual</th>
+            <th>Valor total frete</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="fq-section" id="rankings" data-source="fretes">
+    <h2>Ranking de veículos</h2>
+    <div class="fq-grid fq-grid3">
+      <div class="fq-card" id="rk-pernoites">
+        <h3>Mais pernoites</h3>
+        <p>Total de pernoites de cada veículo e o percentual das suas cargas que tiveram pernoite.</p>
+        <div class="fq-scroll fq-rk"><table class="fq-table"><thead><tr><th class="fq-l">#</th><th class="fq-l">Frota</th><th>Cargas</th><th>Com pernoite</th><th>% cargas c/ pernoite</th><th>Pernoites</th></tr></thead><tbody id="rk-pern"></tbody></table></div>
+      </div>
+      <div class="fq-card" id="rk-dispersao">
+        <h3>Maior dispersão de km</h3>
+        <p>Percentual que o veículo rodou acima do km programado, somando as cargas: (km rodado − km programado) ÷ km programado.</p>
+        <div class="fq-scroll fq-rk"><table class="fq-table"><thead><tr><th class="fq-l">#</th><th class="fq-l">Frota</th><th>Cargas</th><th>Km programado</th><th>Km rodado</th><th>% dispersão</th></tr></thead><tbody id="rk-disp"></tbody></table></div>
+      </div>
+      <div class="fq-card" id="rk-custo">
+        <h3>Mais caros sobre o faturamento</h3>
+        <p>Frete pago ÷ valor da carga transportada pelo veículo. Quanto maior, mais caro em relação ao que fatura.</p>
+        <div class="fq-scroll fq-rk"><table class="fq-table"><thead><tr><th class="fq-l">#</th><th class="fq-l">Frota</th><th>Frete</th><th>Faturamento (valor carga)</th><th>% custo s/ faturamento</th></tr></thead><tbody id="rk-cust"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fq-section" id="justificativa">
+    <h2>Justificativa de custos</h2>
+    <div class="fq-grid">
+      <div class="fq-card" id="por-dia">
+        <h3>Frete por dia de saída</h3>
+        <p>Valor total de frete dos agregados em cada dia. As datas escolhidas aparecem em destaque.</p>
+        <div class="fq-chart" id="fq-dia" data-source="fretes"></div>
+      </div>
+      <div class="fq-card" id="por-rota" data-source="fretes">
+        <h3>Custo por rota</h3>
+        <p>Rotas com custo por km ou frete sobre a carga altos são as que mais pedem justificativa.</p>
+        <div class="fq-scroll">
+          <table class="fq-table" id="fq-rota">
+            <thead><tr>
+              <th class="fq-l"><button data-sort="rota">Rota</button></th>
+              <th><button data-sort="viagens">Viagens</button></th>
+              <th><button data-sort="frete_medio">Frete médio</button></th>
+              <th><button data-sort="r_km">R$/km</button></th>
+              <th><button data-sort="pct_frete_carga">Frete/carga</button></th>
+              <th><button data-sort="frete_total">Total</button></th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="fq-card" id="ocorrencias">
+      <h3>Ocorrências que explicam custo</h3>
+      <p>Viagens de agregados com observação registrada ou que rodaram 30% ou mais acima do km previsto.</p>
+      <div class="fq-scroll">
+        <table class="fq-table" id="fq-oc" data-source="fretes" data-row-key="linha">
+          <thead><tr>
+            <th class="fq-l" data-field="data"><button data-sort="data">Data</button></th>
+            <th class="fq-l" data-field="transportador"><button data-sort="transportador">Transportador</button></th>
+            <th class="fq-l" data-field="motorista"><button data-sort="motorista">Motorista</button></th>
+            <th class="fq-l" data-field="rota"><button data-sort="rota">Rota</button></th>
+            <th data-field="km_previsto"><button data-sort="km_previsto">Km prev.</button></th>
+            <th data-field="km_realizado"><button data-sort="km_realizado">Km real</button></th>
+            <th data-field="dispersao_km_pct"><button data-sort="dispersao_km_pct">Desvio km</button></th>
+            <th data-field="frete_total"><button data-sort="frete_total">Frete</button></th>
+            <th class="fq-l" data-field="observacao"><button data-sort="observacao">Observação</button></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <script src="dash-shim.js"></script>
+  <script src="painel.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

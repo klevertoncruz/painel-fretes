@@ -1,0 +1,51 @@
+[
+  {
+    "carregamento": "346219",
+    "campo": "valor_carga",
+    "valor": 87117.52,
+    "antes": 8711752.0,
+    "motivo": "Valor da carga exportado sem a vírgula decimal; corrigido a pedido do kleverton."
+  },
+  {
+    "carregamento": "347079",
+    "campo": "entregas",
+    "valor": 20,
+    "antes": 40197.0,
+    "motivo": "Quantidade de entregas informada pelo kleverton."
+  },
+  {
+    "carregamento": "349384",
+    "campo": "entregas",
+    "valor": 12,
+    "antes": 197.0,
+    "motivo": "Quantidade de entregas informada pelo kleverton."
+  },
+  {
+    "carregamento": "349228",
+    "campo": "entregas",
+    "valor": 7,
+    "antes": 196.0,
+    "motivo": "Quantidade de entregas informada pelo kleverton."
+  },
+  {
+    "carregamento": "348809",
+    "campo": "entregas",
+    "valor": 18,
+    "antes": 141.0,
+    "motivo": "Quantidade de entregas informada pelo kleverton."
+  },
+  {
+    "carregamento": "346877",
+    "campo": "peso_kg",
+    "valor": 12950,
+    "antes": 69993.1,
+    "motivo": "Peso informado pelo kleverton (sistema tinha o valor da carga no peso)."
+  },
+  {
+    "carregamento": "348480",
+    "campo": "valor_carga",
+    "valor": 31951.3,
+    "antes": 319511.33,
+    "motivo": "Valor da carga informado pelo kleverton."
+  }
+]
