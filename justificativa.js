@@ -33,13 +33,20 @@ const mesAnterior = (m) => {
   return b === 1 ? `${a - 1}-12` : `${a}-${String(b - 1).padStart(2, '0')}`;
 };
 
-// Indicadores de um mês, com as mesmas regras do painel: só agregados com valor de frete.
-export function resumoMes(linhas, mes) {
-  const rs = linhas.filter((r) => !r.frota_propria && r.data && r.data.startsWith(mes) && (r.frete_total || 0) > 0);
+// Período da competência: as datas salvas (a competência não é o mês fechado) ou, sem elas, o mês do calendário.
+const fimDoMes = (m) => { const [a, b] = m.split('-').map(Number); return `${m}-${String(new Date(a, b, 0).getDate()).padStart(2, '0')}`; };
+export const periodo = (mes, j) => (j && j.periodo_de && j.periodo_ate ? { de: j.periodo_de, ate: j.periodo_ate } : { de: mes + '-01', ate: fimDoMes(mes) });
+const somaDias = (iso, n) => { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+const somaMes = (iso) => { const d = new Date(iso + 'T12:00:00'); const dia = d.getDate(); d.setDate(1); d.setMonth(d.getMonth() + 1); d.setDate(Math.min(dia, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate())); return d.toISOString().slice(0, 10); };
+export const br = (iso) => (iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : '');
+
+// Indicadores de uma competência, com as mesmas regras do painel: só agregados com valor de frete.
+export function resumoMes(linhas, mes, per = periodo(mes)) {
+  const rs = linhas.filter((r) => !r.frota_propria && r.data && r.data >= per.de && r.data <= per.ate && (r.frete_total || 0) > 0);
   const soma = (f) => rs.reduce((t, r) => t + (Number(r[f]) || 0), 0);
   const comKm = rs.filter((r) => r.km_previsto > 0 && r.km_realizado != null);
   const o = {
-    mes, viagens: rs.length, frete: soma('frete_total'), peso: soma('peso_kg'), km: soma('km_realizado'),
+    mes, de: per.de, ate: per.ate, viagens: rs.length, frete: soma('frete_total'), peso: soma('peso_kg'), km: soma('km_realizado'),
     entregas: soma('entregas'), valor_carga: soma('valor_carga'),
     com_pernoite: rs.filter((r) => (r.pernoites || 0) > 0).length,
     km_prev: comKm.reduce((t, r) => t + r.km_previsto, 0), km_real_comp: comKm.reduce((t, r) => t + r.km_realizado, 0),
@@ -57,8 +64,8 @@ export function resumoMes(linhas, mes) {
 
 // Junta o que veio da base com o que foi digitado e calcula volume x reajuste.
 export function calcular(linhas, mes, j, jAnt) {
-  const s = resumoMes(linhas, mes);
-  const p = resumoMes(linhas, mesAnterior(mes));
+  const s = resumoMes(linhas, mes, periodo(mes, j));
+  const p = resumoMes(linhas, mesAnterior(mes), periodo(mesAnterior(mes), jAnt));
   const nfs = (j.nfs || []).filter((n) => n.valor);
   const totalNfs = nfs.reduce((t, n) => t + n.valor, 0);
   const contabil = j.realizado_contabil ?? null;
@@ -146,7 +153,7 @@ const CAMPOS = [
 export function iniciarJustificativa({ db, admin, email }) {
   const raiz = $('aba-just');
   if (!raiz) return;
-  let mes = null, dados = {}, dadosAnt = null, linhas = [], slides = [], atual = 0;
+  let mes = null, dados = {}, dadosAnt = null, linhas = [], slides = [], atual = 0, docs = {};
 
   const form = $('jc-campos');
   form.innerHTML = CAMPOS.map(([k, rot, , ph, dica]) => `<div class="fq-field"><label for="jc-${k}">${esc(rot)}</label><input id="jc-${k}" ${['texto'].includes(CAMPOS.find((c) => c[0] === k)[2]) ? '' : 'inputmode="decimal"'} placeholder="${esc(ph || dica || '')}"${admin ? '' : ' readonly'}>${dica ? `<small>${esc(dica)}</small>` : ''}</div>`).join('');
@@ -162,6 +169,8 @@ export function iniciarJustificativa({ db, admin, email }) {
   const preencher = () => {
     for (const [k, , tipo, ph] of CAMPOS) $('jc-' + k).value = dados[k] != null ? fmt(k, dados[k]) : tipo === 'texto' && ph ? '' : '';
     $('jc-nfs').value = (dados.nfs || []).map((n) => [n.fornecedor, n.nf, dec2.format(n.valor)].join('; ')).join('\n');
+    const per = periodo(mes, dados);
+    $('jc-de').value = per.de; $('jc-ate').value = per.ate;
     $('jc-justificativa').value = dados.justificativa || '';
     $('jc-acoes').value = dados.acoes || '';
     const quem = dados.atualizado_por ? `Salvo por ${dados.atualizado_por}${dados.atualizado_em?.toDate ? ' em ' + dados.atualizado_em.toDate().toLocaleString('pt-BR') : ''}.` : 'Ainda não há números salvos para este mês.';
@@ -175,6 +184,8 @@ export function iniciarJustificativa({ db, admin, email }) {
     }
     o.nfs = $('jc-nfs').value.split('\n').map((l) => l.split(/[;\t]/).map((x) => x.trim())).filter((p) => p.some(Boolean))
       .map((p) => ({ fornecedor: p[0] || '', nf: p.length > 2 ? p[1] : '', valor: numeroBR(p[p.length - 1]) })).filter((n) => n.valor);
+    o.periodo_de = $('jc-de').value || null;
+    o.periodo_ate = $('jc-ate').value || null;
     o.justificativa = $('jc-justificativa').value.trim() || null;
     o.acoes = $('jc-acoes').value.trim() || null;
     return o;
@@ -184,10 +195,11 @@ export function iniciarJustificativa({ db, admin, email }) {
     if (!mes) return;
     const j = { ...dados, ...lerForm() };
     const c = calcular(linhas, mes, j, dadosAnt);
-    slides = montarSlides(c, linhas, $('jc-extras').checked, resumoMes, textoSugerido);
+    const resumoComp = (m) => resumoMes(linhas, m, periodo(m, m === mes ? j : docs[m]));
+    slides = montarSlides(c, linhas, $('jc-extras').checked, resumoComp, textoSugerido);
     $('jc-slides').innerHTML = slides.map((s, i) => htmlSlide(s, i, slides.length)).join('');
     $('jc-aviso').textContent = c.temOrc ? '' : 'Preencha o orçamento e as viagens orçadas para aparecerem os slides de orçado x realizado e de volume x reajuste.';
-    $('jc-sistema').textContent = `No sistema, ${nomeMes(mes)} tem ${N(c.s.viagens)} viagens de agregados, ${R(c.s.frete)} de frete e ${T(c.s.peso)} transportadas.`;
+    $('jc-sistema').textContent = `No sistema, a competência ${nomeMes(mes)} (saídas de ${br(c.s.de)} a ${br(c.s.ate)}) tem ${N(c.s.viagens)} viagens de agregados, ${R(c.s.frete)} de frete e ${T(c.s.peso)} transportadas.`;
     if (!$('jc-justificativa').value.trim()) $('jc-justificativa').placeholder = textoSugerido(c) || 'Texto da justificativa';
     if (!raiz.querySelector('.jc-show').hidden) mostrar(atual);
   };
@@ -196,9 +208,17 @@ export function iniciarJustificativa({ db, admin, email }) {
     mes = m;
     $('jc-salvo').textContent = 'Carregando…';
     try {
-      const [a, b] = await Promise.all([getDoc(doc(db, 'justificativas', m)), getDoc(doc(db, 'justificativas', mesAnterior(m)))]);
+      const ms = [m]; for (let k = 0; k < 6; k++) ms.push(mesAnterior(ms[ms.length - 1]));
+      const lidos = await Promise.all(ms.map((x) => getDoc(doc(db, 'justificativas', x))));
+      docs = {}; lidos.forEach((d, k) => { if (d.exists()) docs[ms[k]] = d.data(); });
+      const [a, b] = lidos;
       dados = a.exists() ? a.data() : {};
       dadosAnt = b.exists() ? b.data() : null;
+      if (!a.exists() && b.exists() && b.data().periodo_ate) {
+        // competência nova começa no dia seguinte ao fim da anterior
+        dados.periodo_de = somaDias(b.data().periodo_ate, 1);
+        dados.periodo_ate = somaMes(b.data().periodo_ate);
+      }
       if (!a.exists() && b.exists()) {
         // traz do mês anterior o que costuma se repetir
         for (const k of ['titulo', 'responsavel', 'cabecalho', 'conta_codigo', 'conta_nome', 'conta_curta', 'reajuste_pct', 'reajuste_desde', 'orcado', 'viagens_orc', 'peso_orc_kg']) if (b.data()[k] != null) dados[k] = b.data()[k];
@@ -206,7 +226,7 @@ export function iniciarJustificativa({ db, admin, email }) {
       preencher();
       if (!a.exists() && b.exists()) $('jc-salvo').textContent = 'Mês novo: orçamento e textos fixos vieram de ' + nomeMes(mesAnterior(m)) + '. Confira e salve.';
     } catch (e) {
-      dados = {}; dadosAnt = null; preencher();
+      dados = {}; dadosAnt = null; docs = {}; preencher();
       $('jc-salvo').textContent = 'Não consegui ler os números salvos (' + (e.code || e.message) + '). Confira se as regras do Firestore foram atualizadas.';
     }
     desenhar();
@@ -214,11 +234,15 @@ export function iniciarJustificativa({ db, admin, email }) {
 
   const atualizarMeses = () => {
     const sel = $('jc-mes');
-    const ms = [...new Set(linhas.filter((r) => !r.frota_propria && r.data).map((r) => r.data.slice(0, 7)))].sort().reverse();
+    const comDados = [...new Set(linhas.filter((r) => !r.frota_propria && r.data).map((r) => r.data.slice(0, 7)))].sort().reverse();
+    if (!comDados.length) return;
+    // a competência pode terminar depois da última saída da base, então o mês seguinte também aparece
+    const [a, b] = comDados[0].split('-').map(Number);
+    const seguinte = b === 12 ? `${a + 1}-01` : `${a}-${String(b + 1).padStart(2, '0')}`;
+    const ms = [seguinte, ...comDados];
     const antes = sel.value;
     sel.innerHTML = ms.map((m) => `<option value="${m}">${nomeMes(m)}</option>`).join('');
-    if (!ms.length) return;
-    const escolha = ms.includes(antes) ? antes : ms[1] || ms[0];
+    const escolha = ms.includes(antes) ? antes : comDados[1] || comDados[0];
     sel.value = escolha;
     if (escolha !== mes) abrirMes(escolha); else desenhar();
   };

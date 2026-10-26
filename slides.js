@@ -22,6 +22,8 @@ const varr = (a, b) => (a && b != null ? b / a - 1 : null);
 const sinalR = (x) => (x > 0 ? '+' : '') + R(x);
 const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 const nomeMes = (m) => (m ? MESES[Number(m.slice(5, 7)) - 1] + '/' + m.slice(0, 4) : '');
+const dm = (iso) => (iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) : '');
+const dmy = (iso) => (iso ? dm(iso) + '/' + iso.slice(0, 4) : '');
 const Mes = (m) => { const s = nomeMes(m); return s.charAt(0).toUpperCase() + s.slice(1); };
 
 // ---------- peças ----------
@@ -79,7 +81,7 @@ const bullets = (itens, marca = '•') => itens.map((i) => [{ text: marca + ' ' 
 const tamPorTamanho = (s, base, min) => { const n = String(s).length; return n > 1500 ? min : n > 1100 ? (base + min) / 2 : base; };
 
 // ---------- montagem ----------
-export function montarSlides(c, linhas, extras, resumoMes, textoSugerido) {
+export function montarSlides(c, linhas, extras, resumoComp, textoSugerido) {
   const j = c.j;
   const unidade = j.cabecalho || 'RPC – MERVIL – LOGÍSTICA';
   const rod = `${unidade}  •  PRESTAÇÃO DE CONTAS  •  ${nomeMes(c.mes).toUpperCase()}`;
@@ -99,6 +101,7 @@ export function montarSlides(c, linhas, extras, resumoMes, textoSugerido) {
     { t: 'img', x: 3.35, y: 2.05, w: 3.3, h: 1.36 },
     txt(5.0, 4.55, 4.3, 0.5, nomeMes(c.mes).toUpperCase(), { size: 20, b: true, color: COR.teal, v: 'mid', a: 'r' }),
     txt(0.6, 4.65, 4.8, 0.4, j.responsavel ? 'Responsável: ' + j.responsavel : '', { size: 12, color: COR.cinza, v: 'mid' }),
+    c.s.de && (c.s.de.slice(8) !== '01' || c.s.de.slice(0, 7) !== c.mes) ? txt(5.0, 5.0, 4.3, 0.3, `Período: ${dmy(c.s.de)} a ${dmy(c.s.ate)}`, { size: 10, color: COR.cinza, v: 'mid', a: 'r' }) : [],
     rodape(`VIEIRA DISTRIBUIDOR  •  ${unidade}  •  PRESTAÇÃO DE CONTAS`),
   ].flat());
 
@@ -209,7 +212,7 @@ export function montarSlides(c, linhas, extras, resumoMes, textoSugerido) {
     ].flat());
   }
 
-  if (extras) S.push(...slidesExtras(c, linhas, rod, resumoMes));
+  if (extras) S.push(...slidesExtras(c, linhas, rod, resumoComp));
 
   // 7. justificativa do gestor
   const just = (j.justificativa || '').trim() || textoSugerido(c);
@@ -243,7 +246,7 @@ export function montarSlides(c, linhas, extras, resumoMes, textoSugerido) {
 }
 
 // Slides com dados da base de fretes do app, no mesmo modelo.
-function slidesExtras(c, linhas, rod, resumoMes) {
+function slidesExtras(c, linhas, rod, resumoComp) {
   const S = [];
   const s = c.s, p = c.p;
   const cel = (v, ruim) => (ruim == null ? v : { text: v, color: ruim ? COR.verm : COR.verde });
@@ -259,14 +262,14 @@ function slidesExtras(c, linhas, rod, resumoMes) {
     pp('Frete sobre o valor da carga', p.pct_carga, s.pct_carga), pp('Viagens com pernoite', p.pct_pernoite, s.pct_pernoite), pp('Km rodado acima do programado', p.dispersao, s.dispersao, (x) => pct(x)),
   ];
   S.push([
-    base('Indicadores da Operação', `Base de fretes dos agregados – ${nomeMes(p.mes)} x ${nomeMes(s.mes)}`, rod),
+    base('Indicadores da Operação', `Base de fretes dos agregados – ${nomeMes(p.mes)} (${dm(p.de)} a ${dm(p.ate)}) x ${nomeMes(s.mes)} (${dm(s.de)} a ${dm(s.ate)})`, rod),
     tabela(0.35, 1.14, 9.3, [3.3, 2.0, 2.0, 2.0], ['Indicador', Mes(p.mes), Mes(s.mes), 'Variação'], linhas1, { rowH: 0.27, size: 9.5 }),
     txt(0.35, 4.75, 9.3, 0.5, 'Valores da base de fretes importada no app: só agregados com valor de frete, frota própria fora. Podem diferir do realizado contábil.', { size: 9, color: COR.cinza, v: 'mid' }),
   ].flat());
 
   const meses = [...new Set(linhas.filter((r) => !r.frota_propria && r.data).map((r) => r.data.slice(0, 7)))].sort().filter((m) => m <= c.mes).slice(-6);
   if (meses.length > 1) {
-    const ms = meses.map((m) => resumoMes(linhas, m));
+    const ms = meses.map((m) => resumoComp(m));
     S.push([
       base('Evolução Mensal', 'Frete dos agregados na base do app', rod),
       { t: 'chart', x: 0.35, y: 1.14, w: 4.4, h: 4.1, cats: ms.map((m) => Mes(m.mes)), series: [{ name: 'Frete', values: ms.map((m) => m.frete), color: COR.verde }], legenda: false },
