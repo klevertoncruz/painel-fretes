@@ -15,6 +15,7 @@ const db = getFirestore(app);
 const $ = (id) => document.getElementById(id);
 const telaLogin = $('login'), telaApp = $('app');
 let ehAdmin = false;
+let avisoAdmin = '';
 let linhasBase = [];
 let correcoes = [];
 
@@ -61,10 +62,22 @@ onAuthStateChanged(auth, async (user) => {
   telaLogin.hidden = true;
   telaApp.hidden = false;
   $('usuario').textContent = user.email;
+  avisoAdmin = '';
   try {
     const adm = await getDoc(doc(db, 'config', 'admins'));
-    ehAdmin = adm.exists() && (adm.data().emails || []).includes(user.email);
-  } catch (e) { ehAdmin = false; }
+    if (!adm.exists()) {
+      avisoAdmin = 'Não achei o documento config/admins no Firestore.';
+    } else {
+      const campo = adm.data().emails;
+      const lista = (Array.isArray(campo) ? campo : [campo]).filter(Boolean).map((e) => String(e).trim().toLowerCase());
+      ehAdmin = lista.includes(String(user.email).toLowerCase());
+      if (!Array.isArray(campo)) avisoAdmin = 'O campo "emails" de config/admins precisa ser do tipo array.';
+      else if (!ehAdmin) avisoAdmin = 'O e-mail ' + user.email + ' não está no campo "emails" de config/admins.';
+    }
+  } catch (e) {
+    ehAdmin = false;
+    avisoAdmin = 'Não consegui ler config/admins (' + mensagemErro(e) + '). Confira se as regras do Firestore foram publicadas.';
+  }
   document.querySelectorAll('.so-admin').forEach((el) => { el.hidden = !ehAdmin; });
   await carregarBase();
 });
@@ -77,7 +90,7 @@ async function carregarBase() {
     if (!meta.exists()) {
       $('status-base').textContent = ehAdmin
         ? 'Nenhuma planilha importada ainda. Use "Importar planilha" para carregar a exportação do sistema.'
-        : 'Nenhuma planilha importada ainda.';
+        : 'Nenhuma planilha importada ainda. Só administradores podem importar. ' + avisoAdmin;
       linhasBase = [];
       await carregarCorrecoes();
       return;
