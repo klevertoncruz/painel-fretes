@@ -16,7 +16,7 @@ html, body { background: #EEF2EF; color: var(--vd-txt); font-family: Arial, Helv
   --nv-display: Arial, Helvetica, sans-serif;
   color-scheme: light; font-family: Arial, Helvetica, sans-serif;
 }
-.fq.barra, .fq#aba-painel, .fq.jc, .fq.correcoes, .fq.login-card { background: #ffffff; border: 1px solid var(--vd-borda); }
+.fq.barra, .fq#aba-painel, .fq#aba-frota, .fq.jc, .fq.correcoes, .fq.login-card { background: #ffffff; border: 1px solid var(--vd-borda); }
 .fq .fq-banner, .fq.login-card { background: #ffffff; border: 1px solid var(--vd-borda); border-bottom: 3px solid var(--vd-laranja); }
 .fq .fq-head h1 { color: var(--vd-teal); font-weight: 700; }
 .fq .fq-head h1 em { color: var(--vd-verde); }
@@ -64,3 +64,4 @@ html, body { background: #EEF2EF; color: var(--vd-txt); font-family: Arial, Helv
 .barra-logo { height: 30px; width: auto; display: block; }
 .fq.barra { border-bottom: 3px solid var(--vd-teal); }
 :is(.btn-primario, .btn-sec, .btn-link, input, select, textarea):focus-visible { outline-color: var(--vd-teal); }
+.fq .fq-table td.fq-l small { display: block; color: var(--vd-cinza); font-size: .7rem; }

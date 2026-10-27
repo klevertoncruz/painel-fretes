@@ -25,6 +25,7 @@
   const brl0 = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
   const int = new Intl.NumberFormat('pt-BR');
   const pct = new Intl.NumberFormat('pt-BR', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const dec1 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const dataBR = (iso) => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : '—';
   const dia = (iso) => iso.slice(8, 10) + '/' + iso.slice(5, 7);
   const opt = (v, f) => v == null || !isFinite(v) ? '—' : f.format(v);
@@ -271,6 +272,7 @@
       return {
         frota: fr, transportador: ordena(vs.map((r) => r.transportador)).join(', '), viagens: vs.length,
         pernoites: d3.sum(vs, (r) => r.pernoites || 0), comPernoite: vs.filter((r) => r.pernoites > 0).length,
+        mediaEntregas: vs.length ? d3.sum(vs, (r) => r.entregas || 0) / vs.length : null,
         kmPrev, kmReal, kmMais: kmReal - kmPrev, pctPernoite: vs.length ? vs.filter((r) => r.pernoites > 0).length / vs.length : null, disp: kmPrev ? (kmReal - kmPrev) / kmPrev : null,
         frete, carga, custo: carga ? frete / carga : null,
       };
@@ -285,7 +287,7 @@
       }));
     };
     rk('rk-pern', porFrota.filter((x) => x.pernoites > 0).sort((a, b) => b.pernoites - a.pernoites || b.comPernoite - a.comPernoite),
-      (x) => x.pernoites, (x) => [td(int.format(x.viagens)), td(int.format(x.comPernoite)), td(pct.format(x.pctPernoite))], (x) => int.format(x.pernoites));
+      (x) => x.pernoites, (x) => [td(int.format(x.viagens)), td(int.format(x.comPernoite)), td(pct.format(x.pctPernoite)), td(x.mediaEntregas == null ? '—' : dec1.format(x.mediaEntregas))], (x) => int.format(x.pernoites));
     rk('rk-disp', porFrota.filter((x) => x.disp != null).sort((a, b) => b.disp - a.disp),
       (x) => x.disp, (x) => [td(int.format(x.viagens)), td(int.format(Math.round(x.kmPrev))), td(int.format(Math.round(x.kmReal)))], (x) => pct.format(x.disp));
     rk('rk-cust', porFrota.filter((x) => x.custo != null).sort((a, b) => b.custo - a.custo),

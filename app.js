@@ -8,6 +8,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 import { iniciarJustificativa } from './justificativa.js';
+import { iniciarFrota } from './frota.js';
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -83,6 +84,7 @@ onAuthStateChanged(auth, async (user) => {
   if (!justificativaIniciada) {
     justificativaIniciada = true;
     iniciarJustificativa({ db, admin: ehAdmin, email: user.email });
+    iniciarFrota();
   }
   await carregarBase();
 });
@@ -97,6 +99,7 @@ document.querySelectorAll('.abas [role="tab"]').forEach((tab) => {
       $(t.getAttribute('aria-controls')).hidden = !ativo;
     });
     if (tab.id === 'tab-just') $('aba-just').dispatchEvent(new Event('jc-abrir'));
+    else if (tab.id === 'tab-frota') $('aba-frota').dispatchEvent(new Event('ff-abrir'));
     else window.dash._redraw();
   });
 });
