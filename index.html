@@ -98,6 +98,8 @@
     <div class="fq-field"><label for="fq-ate">Data saída até</label><input id="fq-ate" type="date" min="2000-01-01" max="2099-12-31"></div>
     <div class="fq-field"><label for="fq-frota">Frota</label><select id="fq-frota"></select></div>
     <div class="fq-field"><label for="fq-ag">Transportador</label><select id="fq-ag"></select></div>
+    <div class="fq-field"><label for="fq-fmes">Mês/ano fechamento</label><input id="fq-fmes" type="month"></div>
+    <div class="fq-field"><label for="fq-fquinz">Quinzena pagamento</label><select id="fq-fquinz"><option value="">Todas</option><option>1ª</option><option>2ª</option><option value="sem">Sem quinzena</option></select></div>
     <div class="fq-acoes"><button id="fq-tudo" type="button">Período todo</button><button id="fq-limpa" type="button">Limpar filtros</button></div>
   </div>
 
@@ -122,6 +124,13 @@
         </div>
       </div>
       <p>Cada viagem de agregado nas datas escolhidas, com subtotal por transportador. Viagens da frota própria (placas FF) ficam fora: <span id="fq-ff">—</span> viagens nessas datas. "Copiar tabela" copia o que está na tela para colar no Excel.</p>
+      <div class="fech-lote so-admin" hidden>
+        <span>Preencher todas as viagens da tabela:</span>
+        <label>Mês/ano <input id="lote-mes" type="month"></label>
+        <label>Quinzena <select id="lote-quinz"><option value="">—</option><option>1ª</option><option>2ª</option></select></label>
+        <button id="lote-aplicar" class="btn-primario" type="button">Aplicar</button>
+        <span id="lote-msg" class="status-import" role="status"></span>
+      </div>
       <div class="fq-scroll">
         <table class="fq-table" id="fq-fech">
           <thead><tr>
@@ -135,9 +144,10 @@
             <th>Peso (kg)</th>
             <th>Valor carga</th>
             <th>Entregas</th>
-            <th>Frete s/ diesel</th>
             <th>Frete manual</th>
             <th>Valor total frete</th>
+            <th class="fq-l">Mês/ano fechamento</th>
+            <th class="fq-l">Quinzena pagamento</th>
           </tr></thead>
           <tbody></tbody>
         </table>

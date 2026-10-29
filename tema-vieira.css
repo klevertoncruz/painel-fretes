@@ -65,3 +65,7 @@ html, body { background: #EEF2EF; color: var(--vd-txt); font-family: Arial, Helv
 .fq.barra { border-bottom: 3px solid var(--vd-teal); }
 :is(.btn-primario, .btn-sec, .btn-link, input, select, textarea):focus-visible { outline-color: var(--vd-teal); }
 .fq .fq-table td.fq-l small { display: block; color: var(--vd-cinza); font-size: .7rem; }
+.fech-lote { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 12px; background: var(--vd-claro); border: 1px solid var(--vd-borda); border-radius: 8px; font-size: .85rem; }
+.fech-lote label { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.fech-lote input, .fech-lote select, .fq .fech-campo { font: inherit; font-size: .8rem; padding: 3px 6px; border: 1px solid #CBD5CF; border-radius: 6px; background: #fff; color: var(--vd-txt); }
+.fq .fech-campo { min-width: 0; }

@@ -116,10 +116,12 @@
     const n2 = (v) => v == null ? '' : v.toFixed(2).replace('.', ',');
     const n0 = (v) => v == null ? '' : String(Math.round(v));
     const linhas = [['Fechamento de ' + dataBR(faixaAtual[0]) + ' a ' + dataBR(faixaAtual[1])],
-      ['Transportador', 'Data saída', 'Nº carga', 'Frota', 'Rota', 'Km previsto', 'Km rodado', 'Dispersão (%)', 'Peso (kg)', 'Valor carga (R$)', 'Entregas', 'Frete s/ diesel (R$)', 'Frete manual (R$)', 'Valor total frete (R$)']];
+      ['Transportador', 'Data saída', 'Nº carga', 'Frota', 'Rota', 'Km previsto', 'Km rodado', 'Dispersão (%)', 'Peso (kg)', 'Valor carga (R$)', 'Entregas', 'Frete manual (R$)', 'Valor total frete (R$)', 'Mês/ano fechamento', 'Quinzena pagamento']];
+    const mk = (x) => (window.fechMarca ? window.fechMarca(x) : {}) || {};
+    const mesBR = (m) => (m ? m.slice(5, 7) + '/' + m.slice(0, 4) : '');
     for (const g of fechAtual) {
-      for (const x of g.viagens) linhas.push([x.transportador, dataBR(x.data), x.carregamento, x.frota, x.rota, n0(x.km_previsto), n0(x.km_realizado), n2(x.dispersao_km_pct), n0(x.peso_kg), n2(x.valor_carga), n0(x.entregas), n2(x.frete_tabela), n2(x.frete_manual), n2(x.frete_total)]);
-      linhas.push(['Subtotal ' + g.nome, '', g.viagens.length + ' viagens', '', '', n0(g.t.km_prev), n0(g.t.km), '', n0(g.t.peso), n2(g.t.carga), n0(g.t.entregas), '', '', n2(g.t.frete)]);
+      for (const x of g.viagens) linhas.push([x.transportador, dataBR(x.data), x.carregamento, x.frota, x.rota, n0(x.km_previsto), n0(x.km_realizado), n2(x.dispersao_km_pct), n0(x.peso_kg), n2(x.valor_carga), n0(x.entregas), n2(x.frete_manual), n2(x.frete_total), mesBR(mk(x).mes), mk(x).quinzena || '']);
+      linhas.push(['Subtotal ' + g.nome, '', g.viagens.length + ' viagens', '', '', n0(g.t.km_prev), n0(g.t.km), '', n0(g.t.peso), n2(g.t.carga), n0(g.t.entregas), '', n2(g.t.frete), '', '']);
     }
     const texto = linhas.map((l) => l.join('\t')).join('\n');
     const ok = () => { btnCopiar.textContent = 'Copiado'; setTimeout(() => { btnCopiar.textContent = 'Copiar tabela'; }, 2000); };
@@ -215,7 +217,9 @@
     const linhas = base.filter((r) => (!transp || r.transportador === transp) && (!frota || r.frota === frota));
     const todos = linhas.filter((r) => !r.frota_propria && r.frete_total != null);
     const noPeriodo = (r) => r.data >= ini && r.data <= fim;
-    const sel = todos.filter(noPeriodo);
+    // com filtro de mês/ano ou quinzena de pagamento (app), valem as viagens marcadas, de qualquer data
+    const filtroFech = window.fechFiltro ? window.fechFiltro() : null;
+    const sel = todos.filter(filtroFech || noPeriodo);
     const t = totais(sel);
     document.getElementById('fq-reg').textContent = int.format(sel.length);
 
@@ -241,13 +245,13 @@
     const linhaTot = (cls, rotulo, t) => {
       const tr = document.createElement('tr'); tr.className = cls;
       const c = td(rotulo, 'fq-l'); c.colSpan = 4;
-      tr.append(c, td(num0(t.km_prev)), td(num0(t.km)), td(''), td(num0(t.peso)), td(brl.format(t.carga)), td(num0(t.entregas)), td(''), td(''), td(brl.format(t.frete)));
+      tr.append(c, td(num0(t.km_prev)), td(num0(t.km)), td(''), td(num0(t.peso)), td(brl.format(t.carga)), td(num0(t.entregas)), td(''), td(brl.format(t.frete)), td(''), td(''));
       return tr;
     };
     const corpo = [];
     for (const g of fechAtual) {
       const h = document.createElement('tr'); h.className = 'fq-grp';
-      const c = td(g.nome + ' · ' + int.format(g.viagens.length) + (g.viagens.length === 1 ? ' viagem' : ' viagens')); c.colSpan = 13; h.append(c);
+      const c = td(g.nome + ' · ' + int.format(g.viagens.length) + (g.viagens.length === 1 ? ' viagem' : ' viagens')); c.colSpan = 15; h.append(c);
       corpo.push(h);
       for (const x of g.viagens) {
         const tr = document.createElement('tr'); tr.dataset.key = String(x.linha);
@@ -256,7 +260,10 @@
           td(num0(x.km_previsto)), td(num0(x.km_realizado)),
           td(d == null ? '—' : int.format(d) + '%', d >= 50 ? 'fq-bad' : d >= 30 ? 'fq-warn' : ''),
           td(num0(x.peso_kg)), td(brlOpt(x.valor_carga)), td(num0(x.entregas)),
-          td(brlOpt(x.frete_tabela)), td(brlOpt(x.frete_manual)), td(brl.format(x.frete_total)));
+          td(brlOpt(x.frete_manual)), td(brl.format(x.frete_total)));
+        // mês/ano e quinzena de pagamento: campos preenchidos no app (window.fechCampos), texto no painel do Claude
+        if (window.fechCampos) tr.append(...window.fechCampos(x));
+        else tr.append(td(''), td(''));
         corpo.push(tr);
       }
       corpo.push(linhaTot('fq-sub', 'Subtotal ' + g.nome, g.t));

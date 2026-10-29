@@ -32,5 +32,9 @@ service cloud.firestore {
       allow read: if logado();
       allow write: if admin();
     }
+    match /fechamentos/{doc} {
+      allow read: if logado();
+      allow write: if admin();
+    }
   }
 }

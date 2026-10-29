@@ -20,6 +20,7 @@ let ehAdmin = false;
 let avisoAdmin = '';
 let linhasBase = [];
 let correcoes = [];
+let marcas = new Map();
 
 // ---------- login ----------
 $('form-login').addEventListener('submit', async (ev) => {
@@ -132,6 +133,13 @@ async function carregarBase() {
 async function carregarCorrecoes() {
   const snap = await getDocs(collection(db, 'correcoes'));
   correcoes = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  try {
+    const f = await getDocs(collection(db, 'fechamentos'));
+    marcas = new Map(f.docs.map((d) => [d.id, d.data()]));
+  } catch (e) {
+    marcas = new Map();
+    console.warn('fechamentos', e);
+  }
   aplicarEDesenhar();
   desenharCorrecoes();
 }
@@ -408,9 +416,92 @@ exportar.replaceWith(novoExportar);
 novoExportar.lastChild.textContent = 'Exportar Excel';
 novoExportar.addEventListener('click', () => {
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet($('fq-fech'), { raw: false }), 'Fechamento');
+  // campos de mês/quinzena viram texto para irem para a planilha
+  const copia = $('fq-fech').cloneNode(true);
+  copia.querySelectorAll('input, select').forEach((el) => {
+    const orig = $('fq-fech').querySelector(`[data-campo="${el.dataset.campo}"][data-chave="${CSS.escape(el.dataset.chave)}"]`);
+    const v = orig ? orig.value : '';
+    el.replaceWith(document.createTextNode(el.tagName === 'INPUT' && v ? v.slice(5, 7) + '/' + v.slice(0, 4) : v));
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(copia, { raw: true }), 'Fechamento');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet($('fq-rota')), 'Rotas');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet($('fq-oc')), 'Ocorrências');
   const de = $('fq-de').value, ate = $('fq-ate').value;
   XLSX.writeFile(wb, `fechamento_${de || 'inicio'}_a_${ate || 'fim'}.xlsx`);
 });
+
+// ---------- mês/ano do fechamento e quinzena de pagamento de cada viagem ----------
+// Guardados em fechamentos/{chave}; a chave usa carga, frota e data para continuar valendo depois de importar outra planilha.
+const chaveViagem = (x) => [x.carregamento, x.frota, x.data].map((v) => String(v ?? '').trim()).join('_').replace(/[/\s]+/g, '-');
+window.fechMarca = (x) => marcas.get(chaveViagem(x));
+window.fechCampos = (x) => {
+  const chave = chaveViagem(x), m = marcas.get(chave) || {};
+  const tdMes = document.createElement('td'), tdQ = document.createElement('td');
+  tdMes.className = 'fq-l'; tdQ.className = 'fq-l';
+  if (!ehAdmin) {
+    tdMes.textContent = m.mes ? m.mes.slice(5, 7) + '/' + m.mes.slice(0, 4) : '';
+    tdQ.textContent = m.quinzena || '';
+    return [tdMes, tdQ];
+  }
+  const mes = document.createElement('input');
+  mes.type = 'month'; mes.value = m.mes || ''; mes.className = 'fech-campo';
+  mes.setAttribute('aria-label', 'Mês/ano do fechamento da carga ' + x.carregamento);
+  const q = document.createElement('select');
+  q.className = 'fech-campo';
+  q.setAttribute('aria-label', 'Quinzena de pagamento da carga ' + x.carregamento);
+  for (const v of ['', '1ª', '2ª']) { const o = document.createElement('option'); o.value = v; o.textContent = v || '—'; q.append(o); }
+  q.value = m.quinzena || '';
+  for (const [el, campo] of [[mes, 'mes'], [q, 'quinzena']]) {
+    el.dataset.campo = campo; el.dataset.chave = chave;
+    el.addEventListener('change', () => salvarMarcas([x], { [campo]: el.value || null }));
+  }
+  tdMes.append(mes); tdQ.append(q);
+  return [tdMes, tdQ];
+};
+
+async function salvarMarcas(viagens, valores) {
+  const msg = $('lote-msg');
+  try {
+    for (let i = 0; i < viagens.length; i += 400) {
+      const lote = writeBatch(db);
+      for (const x of viagens.slice(i, i + 400)) {
+        const chave = chaveViagem(x);
+        const novo = { ...(marcas.get(chave) || {}), ...valores, carregamento: String(x.carregamento), frota: x.frota, data: x.data, atualizado_por: auth.currentUser.email };
+        lote.set(doc(db, 'fechamentos', chave), { ...novo, atualizado_em: serverTimestamp() });
+        marcas.set(chave, novo);
+      }
+      await lote.commit();
+    }
+    if (viagens.length > 1) msg.textContent = 'Gravado em ' + viagens.length + ' viagens.';
+  } catch (e) {
+    msg.textContent = 'Não foi possível gravar (' + mensagemErro(e) + '). Confira se as regras do Firestore incluem "fechamentos".';
+  }
+}
+
+$('lote-aplicar').addEventListener('click', async () => {
+  const mes = $('lote-mes').value, quinzena = $('lote-quinz').value;
+  if (!mes && !quinzena) { $('lote-msg').textContent = 'Escolha o mês/ano, a quinzena ou os dois.'; return; }
+  const chaves = new Set([...document.querySelectorAll('#fq-fech tbody tr[data-key]')].map((tr) => tr.dataset.key));
+  const viagens = (window.dash.data('fretes').data || []).filter((r) => chaves.has(String(r.linha)));
+  if (!viagens.length) { $('lote-msg').textContent = 'Nenhuma viagem na tabela.'; return; }
+  const valores = {};
+  if (mes) valores.mes = mes;
+  if (quinzena) valores.quinzena = quinzena;
+  $('lote-aplicar').disabled = true;
+  $('lote-msg').textContent = 'Gravando ' + viagens.length + ' viagens…';
+  await salvarMarcas(viagens, valores);
+  $('lote-aplicar').disabled = false;
+  window.dash._redraw();
+});
+
+// filtros do fechamento por mês/ano e quinzena de pagamento
+window.fechFiltro = () => {
+  const mes = $('fq-fmes').value, q = $('fq-fquinz').value;
+  if (!mes && !q) return null;
+  return (x) => {
+    const m = marcas.get(chaveViagem(x)) || {};
+    return (!mes || m.mes === mes) && (!q || (q === 'sem' ? !m.quinzena : m.quinzena === q));
+  };
+};
+for (const id of ['fq-fmes', 'fq-fquinz']) $(id).addEventListener('change', () => window.dash._redraw());
+$('fq-limpa').addEventListener('click', () => { $('fq-fmes').value = ''; $('fq-fquinz').value = ''; window.dash._redraw(); });
