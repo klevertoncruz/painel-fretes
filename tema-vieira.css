@@ -34,7 +34,7 @@ html, body { background: #EEF2EF; color: var(--vd-txt); font-family: Arial, Helv
 .fq .fq-t1 { background: var(--vd-verde); }
 .fq .fq-t1 > span, .fq .fq-t1 > b, .fq .fq-t1 > small { color: #ffffff; }
 .fq .fq-t1 .fq-ico { background: rgba(255, 255, 255, .18); color: #ffffff; }
-.fq .fq-ico, .fq .fq-t2 .fq-ico, .fq .fq-t3 .fq-ico, .fq .fq-t8 .fq-ico, .fq .fq-t4 .fq-ico, .fq .fq-t5 .fq-ico, .fq .fq-t6 .fq-ico, .fq .fq-t7 .fq-ico { background: rgba(31, 126, 120, .12); color: var(--vd-teal); }
+.fq .fq-ico, .fq .fq-t2 .fq-ico, .fq .fq-t3 .fq-ico, .fq .fq-t8 .fq-ico, .fq .fq-t4 .fq-ico, .fq .fq-t5 .fq-ico, .fq .fq-t6 .fq-ico, .fq .fq-t7 .fq-ico, .fq .fq-t9 .fq-ico { background: rgba(31, 126, 120, .12); color: var(--vd-teal); }
 .fq .fq-t4 .fq-ico, .fq .fq-t7 .fq-ico { background: rgba(244, 132, 45, .14); color: #d06a1a; }
 .fq .fq-t4 > b { color: var(--vd-verde); }
 
