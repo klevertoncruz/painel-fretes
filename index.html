@@ -105,10 +105,11 @@
 
   <div class="fq-tiles" id="indicadores" data-source="fretes">
     <div class="fq-tile fq-t1"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg></i><span>Total a pagar</span><b class="dash-skeleton" data-k="frete_total">—</b><small>Soma do valor total do frete</small></div>
+    <div class="fq-tile fq-t9"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></i><span>Faturamento</span><b class="dash-skeleton" data-k="valor_carga">—</b><small>Valor da carga dos agregados</small></div>
     <div class="fq-tile fq-t2"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></i><span>Viagens de agregados</span><b class="dash-skeleton" data-k="viagens">—</b><small>Carregamentos com frete</small></div>
     <div class="fq-tile fq-t3"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 5 21"/><path d="m16 3 3 18"/><path d="M12 5v3"/><path d="M12 11v3"/><path d="M12 17v3"/></svg></i><span>Km rodados</span><b class="dash-skeleton" data-k="km">—</b><small id="fq-km-ff">Km realizado dos agregados</small></div>
     <div class="fq-tile fq-t8"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><path d="m9 10 2 2 4-4"/></svg></i><span>Entregas realizadas</span><b class="dash-skeleton" data-k="entregas">—</b><small>Soma das entregas das viagens</small></div>
-    <div class="fq-tile fq-t4"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg></i><span>Frete sobre a carga</span><b class="dash-skeleton" data-k="pct_frete_carga">—</b><small>Frete ÷ valor da carga</small></div>
+    <div class="fq-tile fq-t4"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg></i><span>Frete sobre o faturamento</span><b class="dash-skeleton" data-k="pct_frete_carga">—</b><small>Frete ÷ faturamento (valor da carga)</small></div>
     <div class="fq-tile fq-t5"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3.5 3.5 0 0 0 0-7h-4a3.5 3.5 0 0 1 0-7h6"/></svg></i><span>Custo por km</span><b class="dash-skeleton" data-k="r_km">—</b><small>Frete ÷ km realizado</small></div>
     <div class="fq-tile fq-t6"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></svg></i><span>Custo por entrega</span><b class="dash-skeleton" data-k="r_entrega">—</b><small>Frete ÷ entregas</small></div>
     <div class="fq-tile fq-t7"><i class="fq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20h12l-2-11H8z"/><circle cx="12" cy="6" r="2.5"/></svg></i><span>Custo por tonelada</span><b class="dash-skeleton" data-k="r_ton">—</b><small>Frete ÷ peso transportado</small></div>
@@ -142,7 +143,7 @@
             <th>Km rodado</th>
             <th>Dispersão</th>
             <th>Peso (kg)</th>
-            <th>Valor carga</th>
+            <th>Faturamento (valor carga)</th>
             <th>Entregas</th>
             <th>Frete manual</th>
             <th>Valor total frete</th>
@@ -194,6 +195,7 @@
               <th><button data-sort="viagens">Viagens</button></th>
               <th><button data-sort="frete_medio">Frete médio</button></th>
               <th><button data-sort="r_km">R$/km</button></th>
+              <th><button data-sort="valor_carga">Faturamento</button></th>
               <th><button data-sort="pct_frete_carga">Frete/carga</button></th>
               <th><button data-sort="frete_total">Total</button></th>
             </tr></thead>

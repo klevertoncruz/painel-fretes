@@ -30,7 +30,7 @@
   const dia = (iso) => iso.slice(8, 10) + '/' + iso.slice(5, 7);
   const opt = (v, f) => v == null || !isFinite(v) ? '—' : f.format(v);
   const fmt = {
-    frete_total: (v) => brl.format(v), viagens: (v) => int.format(v), entregas: (v) => int.format(v), km: (v) => int.format(Math.round(v)) + ' km', pct_frete_carga: (v) => opt(v, pct),
+    frete_total: (v) => brl.format(v), valor_carga: (v) => brl.format(v), viagens: (v) => int.format(v), entregas: (v) => int.format(v), km: (v) => int.format(Math.round(v)) + ' km', pct_frete_carga: (v) => opt(v, pct),
     r_km: (v) => opt(v, brl), r_entrega: (v) => opt(v, brl), r_ton: (v) => opt(v, brl),
   };
 
@@ -116,7 +116,7 @@
     const n2 = (v) => v == null ? '' : v.toFixed(2).replace('.', ',');
     const n0 = (v) => v == null ? '' : String(Math.round(v));
     const linhas = [['Fechamento de ' + dataBR(faixaAtual[0]) + ' a ' + dataBR(faixaAtual[1])],
-      ['Transportador', 'Data saída', 'Nº carga', 'Frota', 'Rota', 'Km previsto', 'Km rodado', 'Dispersão (%)', 'Peso (kg)', 'Valor carga (R$)', 'Entregas', 'Frete manual (R$)', 'Valor total frete (R$)', 'Mês/ano fechamento', 'Quinzena pagamento']];
+      ['Transportador', 'Data saída', 'Nº carga', 'Frota', 'Rota', 'Km previsto', 'Km rodado', 'Dispersão (%)', 'Peso (kg)', 'Faturamento - valor carga (R$)', 'Entregas', 'Frete manual (R$)', 'Valor total frete (R$)', 'Mês/ano fechamento', 'Quinzena pagamento']];
     const mk = (x) => (window.fechMarca ? window.fechMarca(x) : {}) || {};
     const mesBR = (m) => (m ? m.slice(5, 7) + '/' + m.slice(0, 4) : '');
     for (const g of fechAtual) {
@@ -305,7 +305,7 @@
     const top = fech.slice().sort((a, b) => b.frete_total - a.frete_total)[0];
     const b = (text) => { const el = document.createElement('b'); el.textContent = text; return el; };
     const parts = ['De ' + dataBR(ini) + ' a ' + dataBR(fim) + ', o frete dos agregados somou ', b(brl.format(t.frete_total)), ' em ',
-      b(int.format(t.viagens)), ' viagens, o equivalente a ', b(opt(t.pct_frete_carga, pct)), ' do valor da carga transportada.'];
+      b(int.format(t.viagens)), ' viagens, para um faturamento (valor da carga) de ', b(brl.format(t.valor_carga)), '. O frete equivale a ', b(opt(t.pct_frete_carga, pct)), ' do faturamento.'];
     if (top && t.frete_total) parts.push(' O maior valor a pagar é de ', b(top.transportador), ', com ', b(pct.format(top.frete_total / t.frete_total)), ' do total.');
     if (!sel.length) parts.splice(0, parts.length, 'Nenhuma viagem de agregado entre ' + dataBR(ini) + ' e ' + dataBR(fim) + '.');
     take.replaceChildren(...parts);
@@ -314,7 +314,7 @@
     const rotas = sortRows('fq-rota', agrupa(sel, 'rota'));
     trota.replaceChildren(...rotas.map((x) => {
       const tr = document.createElement('tr');
-      tr.append(td(x.rota, 'fq-l'), td(int.format(x.viagens)), td(opt(x.frete_medio, brl0)), td(opt(x.r_km, brl)), td(opt(x.pct_frete_carga, pct)), td(brl.format(x.frete_total)));
+      tr.append(td(x.rota, 'fq-l'), td(int.format(x.viagens)), td(opt(x.frete_medio, brl0)), td(opt(x.r_km, brl)), td(brl0.format(x.valor_carga)), td(opt(x.pct_frete_carga, pct)), td(brl.format(x.frete_total)));
       return tr;
     }));
 
