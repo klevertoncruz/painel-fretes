@@ -2,7 +2,7 @@
 // (orçado x realizado, volume x reajuste, indicadores da operação) a partir da base de fretes e dos
 // números do orçamento que o administrador digita. Os números digitados ficam em justificativas/{AAAA-MM}.
 import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { montarSlides, htmlSlide, gerarPptx } from './slides.js';
+import { montarSlides, htmlSlide, gerarPptx } from './slides.js?v=dev';
 
 const $ = (id) => document.getElementById(id);
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });

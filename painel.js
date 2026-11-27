@@ -224,7 +224,7 @@
     document.getElementById('fq-reg').textContent = int.format(sel.length);
 
     // indicadores
-    document.querySelectorAll('#indicadores b').forEach((b) => { b.classList.remove('dash-skeleton'); b.textContent = fmt[b.dataset.k](t[b.dataset.k]); });
+    document.querySelectorAll('#indicadores b').forEach((b) => { b.classList.remove('dash-skeleton'); const f = fmt[b.dataset.k]; b.textContent = f ? f(t[b.dataset.k]) : '—'; });
     const kmFF = d3.sum(linhas.filter((r) => r.frota_propria && noPeriodo(r)), (r) => r.km_realizado || 0);
     document.getElementById('fq-km-ff').textContent = 'Agregados. Frota própria: ' + int.format(Math.round(kmFF)) + ' km';
     document.getElementById('fq-ff').textContent = int.format(linhas.filter((r) => r.frota_propria && noPeriodo(r)).length);
