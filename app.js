@@ -6,9 +6,9 @@ import {
 import {
   getFirestore, doc, getDoc, getDocs, collection, writeBatch, addDoc, deleteDoc, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { firebaseConfig } from './firebase-config.js';
-import { iniciarJustificativa } from './justificativa.js';
-import { iniciarFrota } from './frota.js';
+import { firebaseConfig } from './firebase-config.js?v=dev';
+import { iniciarJustificativa } from './justificativa.js?v=dev';
+import { iniciarFrota } from './frota.js?v=dev';
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
